@@ -27,7 +27,7 @@ public class ExecutorService
         };
         buildProcess.Start();
         buildProcess.WaitForExit();
-        Console.WriteLine("build complete");
+        Console.WriteLine("...build complete");
     }
 
     public ExecuteResultDto Execute(string usedLang, string code)
@@ -46,15 +46,9 @@ public class ExecutorService
 
         File.WriteAllText(path, code);
         
-        Console.WriteLine($"\n==================written==================\n\n{code}\n\n==================end==================\n");
-
         InsertTestCases(path, funcName);
         var fileContests = File.ReadAllText(path);
 
-        Console.WriteLine($"==================executed==================\n\n{File.ReadAllText(path)}\n\n==================end==================\n");
-        
-        Console.WriteLine($"\"./scripts/deploy-executor-container.sh\" {shRunArgs}");
-        
         var execProcess = new Process()
         {
             StartInfo = new ProcessStartInfo()
