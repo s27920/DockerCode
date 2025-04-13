@@ -14,4 +14,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ExecutorService\client-src\node\" />
+    </ItemGroup>
+
 </Project>
