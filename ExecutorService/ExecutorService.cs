@@ -36,7 +36,7 @@ public class ExecutorService
         
         if (!ValidateFileContents(code, funcName))
         {
-            return new ExecuteResultDto("","Code not executed, function signature modified");
+            return new ExecuteResultDto("","Code not executed, incorrect function signature");
         }
 
         var guid = Guid.NewGuid();
@@ -52,6 +52,8 @@ public class ExecutorService
         InsertTestCases(path, funcName);
         
         Console.WriteLine($"==================executed==================\n\n{File.ReadAllText(path)}\n\n==================end==================\n");
+        
+        Console.WriteLine($"\"./scripts/deploy-executor-container.sh\" {shRunArgs}");
         
         var execProcess = new Process()
         {
