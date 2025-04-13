@@ -1,1 +1,0 @@
-console.log(`Hello docker! ${1+1}`)
