@@ -121,17 +121,17 @@ public class ExecutorService
         return funcName;
     }
 
-    private string GetComparingStatement(string[] testCase, string funcName)
+    private string GetComparingStatement(TestCase testCase, string funcName)
     {
-        return $"JSON.stringify({testCase[0]}) === JSON.stringify({funcName}({testCase[1]}))";
+        return $"JSON.stringify({testCase.ExpectedOutput}) === JSON.stringify({funcName}({testCase.TestInput}))";
     }
 
-    private string PrintComparingStatement(string[] testCase, string funcName)
+    private string PrintComparingStatement(TestCase testCase, string funcName)
     {
         return $"\nconsole.log({GetComparingStatement(testCase, funcName)});";
     }
 
-    IEnumerable<string[]> EnumerateTestCases(string testCases)
+    IEnumerable<TestCase> EnumerateTestCases(string testCases)
     {
         for (var i = 0; i < testCases.Length;)
         {
@@ -142,7 +142,9 @@ public class ExecutorService
             var endOfCorr = testCases.IndexOf("<<", i, StringComparison.Ordinal);
             var str2 = testCases.Substring(i, endOfCorr - i);
             i = endOfCorr + 3;
-            yield return [str1, str2];
+            yield return new TestCase(str1, str2);
         }
     }
+
+    internal record TestCase(string TestInput, string ExpectedOutput) { }
 }
