@@ -40,11 +40,6 @@ RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh -O dotnet-ins
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY entrypoint.sh .
-COPY buildImages.sh .
-COPY deployExecutorContainer.sh .
-COPY client-src /app/client-src
-COPY exec-scripts /app/exec-scripts
-COPY executor-images /app/executor-images
-COPY scripts /app/scripts
+COPY ./ExecutorService .
 
 ENTRYPOINT ["/app/entrypoint.sh"]
