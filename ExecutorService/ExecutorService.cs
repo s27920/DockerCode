@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace ConsoleApp7.ExecutorService;
 
 using System.Diagnostics;
@@ -39,7 +41,10 @@ public class ExecutorService
 
         var fileContests = File.ReadAllText(path);
 
-        ValidateFileContents(path);
+        if (ValidateFileContents(code))
+        {
+            return new ExecuteResultDto("","Code not executed, function signature modified");
+        }
         InsertTestCases(path);
         
         var execProcess = new Process()
@@ -66,9 +71,15 @@ public class ExecutorService
         return new ExecuteResultDto(output, error);
     }
 
-    private void ValidateFileContents(string path)
+    private bool ValidateFileContents(string code)
     {
-        Console.WriteLine("checking file validity");
+        //fetch file template, for now hardcoded
+        const string funcName = "func";
+        //source for the regex pattern: https://stackoverflow.com/a/58278733
+        const string matcher = $@"^(?:[\s]+)?(?:const|let|var|)?(?:[a-z0-9.]+(?:\.prototype)?)?(?:\s)?(?:[a-z0-9-_]+\s?=)?\s?(?:[a-z0-9]+\s+\:\s+)?(?:function\s?)?{funcName}\s?\(.*\)\s?(?:.+)?([=>]:)?\{{(?:(?:[^}}{{]+|\{{(?:[^}}{{]+|\{{[^}}{{]*\}})*\}})*\}}(?:\s?\(.*\)\s?\)\s?)?)?(?:\;)?";
+        var regex = new Regex(matcher);
+        var match = regex.Match(code);
+        return match.Success;
 
     }
 
@@ -89,10 +100,33 @@ public class ExecutorService
                    "[94,37,9,52,17]<\n" +
                    "[9,17,37,52,94]<<\n" ;
 
+        using (var fileWriter = new StreamWriter(path))
+        {
+            foreach (var testCase in EnumerateTestCases(testCases))
+            {
+                fileWriter.WriteLine(PrintComparingStatement(testCase));
+            }
+        }
         EnumerateTestCases(testCases);
     }
 
-    static IEnumerable<string[]> EnumerateTestCases(string testCases)
+    private string getFuncSignature()
+    {
+        string funcName = "hehe";
+        return funcName;
+    }
+
+    private string getComparingStatement(string[] testCase)
+    {
+        return $"JSON.stringify({testCase[0]}) === JSON.stringify({getFuncSignature()}({testCase[1]}))";
+    }
+
+    private string PrintComparingStatement(string[] testCase)
+    {
+        return $"console.log({getComparingStatement(testCase)})";
+    }
+
+    IEnumerable<string[]> EnumerateTestCases(string testCases)
     {
         for (var i = 0; i < testCases.Length;)
         {
