@@ -47,10 +47,10 @@ public class ExecutorService
         File.WriteAllText(path, code);
         
         Console.WriteLine($"\n==================written==================\n\n{code}\n\n==================end==================\n");
-        
-        var fileContests = File.ReadAllText(path);
+
         InsertTestCases(path, funcName);
-        
+        var fileContests = File.ReadAllText(path);
+
         Console.WriteLine($"==================executed==================\n\n{File.ReadAllText(path)}\n\n==================end==================\n");
         
         Console.WriteLine($"\"./scripts/deploy-executor-container.sh\" {shRunArgs}");

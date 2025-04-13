@@ -12,3 +12,4 @@ C:\Users\janek\RiderProjects\ConsoleApp7\ConsoleApp7\obj\Debug\net8.0\refint\Con
 C:\Users\janek\RiderProjects\ConsoleApp7\ConsoleApp7\obj\Debug\net8.0\ConsoleApp7.pdb
 C:\Users\janek\RiderProjects\ConsoleApp7\ConsoleApp7\obj\Debug\net8.0\ConsoleApp7.genruntimeconfig.cache
 C:\Users\janek\RiderProjects\ConsoleApp7\ConsoleApp7\obj\Debug\net8.0\ref\ConsoleApp7.dll
+C:\Users\janek\RiderProjects\ConsoleApp7\ConsoleApp7\obj\Debug\net8.0\ConsoleApp7.sourcelink.json
