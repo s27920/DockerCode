@@ -10,13 +10,16 @@ public class Program
         // example data
         string[] langs = { "node" };
         var usedLang = "node";
-        var code = "console.log(`Hello docker! ${1+1}`)";
+        
+        // TODO get from controller, for now hardcoded
+        var code = "function func(arr){\n    return arr.sort((a, b) => a - b);\n}";
         
         var executorService = new ExecutorService.ExecutorService(langs);
         
         executorService.BuildImages();
         
         var resultDto = executorService.Execute(usedLang, code);
+        
         Console.WriteLine($"Output: {resultDto.stdOut}");
         Console.WriteLine($"Error: {resultDto.stdErr}");
     }

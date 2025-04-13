@@ -32,20 +32,26 @@ public class ExecutorService
 
     public ExecuteResultDto Execute(string usedLang, string code)
     {
+        string funcName = GetFuncSignature();
+        
+        if (!ValidateFileContents(code, funcName))
+        {
+            return new ExecuteResultDto("","Code not executed, function signature modified");
+        }
+
         var guid = Guid.NewGuid();
         var path = $"client-src/{usedLang}/{guid.ToString()}.js";
         string[] arr = { usedLang, guid.ToString() };
         var shRunArgs = string.Join(" ", arr.Select(arg => $"\"{arg}\""));
+
         File.WriteAllText(path, code);
-        Console.WriteLine("write complete");
-
+        
+        Console.WriteLine($"\n==================written==================\n\n{code}\n\n==================end==================\n");
+        
         var fileContests = File.ReadAllText(path);
-
-        if (ValidateFileContents(code))
-        {
-            return new ExecuteResultDto("","Code not executed, function signature modified");
-        }
-        InsertTestCases(path);
+        InsertTestCases(path, funcName);
+        
+        Console.WriteLine($"==================executed==================\n\n{File.ReadAllText(path)}\n\n==================end==================\n");
         
         var execProcess = new Process()
         {
@@ -63,28 +69,27 @@ public class ExecutorService
         execProcess.Start();
         execProcess.StandardInput.Write(fileContests);
         execProcess.StandardInput.Close();
-        File.Delete(path);
         execProcess.WaitForExit();
-        
+        File.Delete(path);
+
         var output = execProcess.StandardOutput.ReadToEnd();
         var error = execProcess.StandardError.ReadToEnd();
         return new ExecuteResultDto(output, error);
     }
 
-    private bool ValidateFileContents(string code)
+    private bool ValidateFileContents(string code, string funcName /*temporary*/)
     {
-        //fetch file template, for now hardcoded
-        const string funcName = "func";
         //source for the regex pattern: https://stackoverflow.com/a/58278733
-        const string matcher = $@"^(?:[\s]+)?(?:const|let|var|)?(?:[a-z0-9.]+(?:\.prototype)?)?(?:\s)?(?:[a-z0-9-_]+\s?=)?\s?(?:[a-z0-9]+\s+\:\s+)?(?:function\s?)?{funcName}\s?\(.*\)\s?(?:.+)?([=>]:)?\{{(?:(?:[^}}{{]+|\{{(?:[^}}{{]+|\{{[^}}{{]*\}})*\}})*\}}(?:\s?\(.*\)\s?\)\s?)?)?(?:\;)?";
+        string matcher = $@"^(?:[\s]+)?(?:const|let|var|)?(?:[a-z0-9.]+(?:\.prototype)?)?(?:\s)?(?:[a-z0-9-_]+\s?=)?\s?(?:[a-z0-9]+\s+\:\s+)?(?:function\s?)?{funcName}\s?\(.*\)\s?(?:.+)?([=>]:)?\{{(?:(?:[^}}{{]+|\{{(?:[^}}{{]+|\{{[^}}{{]*\}})*\}})*\}}(?:\s?\(.*\)\s?\)\s?)?)?(?:\;)?";
         var regex = new Regex(matcher);
         var match = regex.Match(code);
         return match.Success;
 
     }
 
-    private void InsertTestCases(string path)
+    private void InsertTestCases(string path, string funcName)
     {
+        // TODO fetch test cases, for now hardcoded
         /*
          proposed test case format
          test data<
@@ -100,30 +105,30 @@ public class ExecutorService
                    "[94,37,9,52,17]<\n" +
                    "[9,17,37,52,94]<<\n" ;
 
-        using (var fileWriter = new StreamWriter(path))
+        using (var fileWriter = new StreamWriter(path, true))
         {
             foreach (var testCase in EnumerateTestCases(testCases))
             {
-                fileWriter.WriteLine(PrintComparingStatement(testCase));
+                fileWriter.WriteLine(PrintComparingStatement(testCase, funcName));
             }
         }
-        EnumerateTestCases(testCases);
     }
 
-    private string getFuncSignature()
+    private string GetFuncSignature()
     {
-        string funcName = "hehe";
+        // TODO fetch and parse file template, for now hardcoded
+        string funcName = "func";
         return funcName;
     }
 
-    private string getComparingStatement(string[] testCase)
+    private string GetComparingStatement(string[] testCase, string funcName)
     {
-        return $"JSON.stringify({testCase[0]}) === JSON.stringify({getFuncSignature()}({testCase[1]}))";
+        return $"JSON.stringify({testCase[0]}) === JSON.stringify({funcName}({testCase[1]}))";
     }
 
-    private string PrintComparingStatement(string[] testCase)
+    private string PrintComparingStatement(string[] testCase, string funcName)
     {
-        return $"console.log({getComparingStatement(testCase)})";
+        return $"\nconsole.log({GetComparingStatement(testCase, funcName)});";
     }
 
     IEnumerable<string[]> EnumerateTestCases(string testCases)
