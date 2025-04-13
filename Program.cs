@@ -6,52 +6,60 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var lang = "node";
-        var code = "console.log(\"Hello World!\")";
+        string[] langs = { "node" };
+        var usedLang = "node";
+        var code = "console.log(`Hello docker! ${1+1}`)";
         var guid = Guid.NewGuid();
-        var path = $"client-src/{lang}/{guid.ToString()}.js";
+        var path = $"client-src/{usedLang}/{guid.ToString()}.js";
+        var shBuildArgs = string.Join(" ", langs.Select(arg => $"\"{arg}\""));
+        string[] arr = { usedLang, guid.ToString() };
+        var shRunArgs = string.Join(" ", arr.Select(arg => $"\"{arg}\""));
+
         
+        
+        
+        Console.WriteLine("building images...");
         var buildProcess = new Process()
         {
             StartInfo = new ProcessStartInfo()
             {
-                FileName = "docker",
-                Arguments = "build -t node-executor -f executor-images/node-image.dockerfile .",
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                RedirectStandardInput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                FileName = "/bin/sh",
+                Arguments = $"\"./buildImages.sh\" {shBuildArgs}",
             }
         };
         buildProcess.Start();
         buildProcess.WaitForExit();
         Console.WriteLine("build complete");
         File.WriteAllText(path, code);
+        Console.WriteLine("write complete");
 
+
+        var fileContests = File.ReadAllText(path);
+        
         var execProcess = new Process()
         {
             StartInfo = new ProcessStartInfo()
             {
-                FileName = "docker", //--read-only
-                Arguments = $"run -i --rm --name node{guid} --memory 256m --cpus 0.5 {lang}-executor",
+                FileName = "/bin/sh",
+                Arguments = $"\"./deployExecutorContainer.sh\" {shRunArgs}",
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 RedirectStandardInput = true,
-                UseShellExecute = false,
                 CreateNoWindow = true
             }
         };
+        
         execProcess.Start();
-        execProcess.StandardInput.Write(File.ReadAllText(path));
+        execProcess.StandardInput.Write(fileContests);
         execProcess.StandardInput.Close();
         execProcess.WaitForExit();
 
         var output = execProcess.StandardOutput.ReadToEnd();
-        var error = execProcess.StandardError.ReadToEnd();  // Add this
+        var error = execProcess.StandardError.ReadToEnd();
 
-        Console.WriteLine($"Output: {output}");
+        Console.WriteLine($"Output here: {output}");
         Console.WriteLine($"Error: {error}");
         File.Delete(path);
+        
     }
 }
