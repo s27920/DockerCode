@@ -74,6 +74,36 @@ public class ExecutorService
 
     private void InsertTestCases(string path)
     {
-        Console.WriteLine("inserting test cases");
+        /*
+         proposed test case format
+         test data<
+         expected output<<
+         test data<
+         expected output<<
+         ...
+         Could also have them all in one line beats me, less space but less readable.
+         Furthermore enumerateTestCases would offset by 1 and 2 respectively instead of 2 and 3
+         */
+        var testCases = "[1,5,2,4,3]<\n" +
+                   "[1,2,3,4,5]<<\n" +
+                   "[94,37,9,52,17]<\n" +
+                   "[9,17,37,52,94]<<\n" ;
+
+        EnumerateTestCases(testCases);
+    }
+
+    static IEnumerable<string[]> EnumerateTestCases(string testCases)
+    {
+        for (var i = 0; i < testCases.Length;)
+        {
+            var endOfTest = testCases.IndexOf('<', i);
+            var str1 = testCases.Substring(i, endOfTest - i);
+            i = endOfTest + 2;
+
+            var endOfCorr = testCases.IndexOf("<<", i, StringComparison.Ordinal);
+            var str2 = testCases.Substring(i, endOfCorr - i);
+            i = endOfCorr + 3;
+            yield return [str1, str2];
+        }
     }
 }
